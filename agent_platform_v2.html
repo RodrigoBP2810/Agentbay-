@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentBay Platform - Run Your AI Agents</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #f5c6cb;
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #c3e6cb;
+            display: block;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left-color: #bee5eb;
+            display: block;
+        }
+
+        .message.warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left-color: #ffeeba;
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .response-box {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .response-box.show {
+            display: block;
+        }
+
+        .response-label {
+            color: #666;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .response-text {
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.95em;
+        }
+
+        .agent-info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .agent-name {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .agent-desc {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .debug-info {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            color: #666;
+        }
+
+        .debug-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .help-text {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #1565c0;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AgentBay Platform v2</h1>
+            <p>Run and test your AI agents</p>
+        </div>
+
+        <div class="content">
+            <!-- Left: Setup -->
+            <div class="card">
+                <h2>Setup</h2>
+
+                <div id="setupMessage" class="message"></div>
+
+                <div class="form-group">
+                    <label for="claudeApiKey">Claude API Key *</label>
+                    <input type="password" id="claudeApiKey" placeholder="sk-ant-..." autocomplete="off">
+                    <div class="help-text">
+                        Get from <a href="https://console.anthropic.com" target="_blank" style="color: #1565c0;">console.anthropic.com</a>. Make sure you have credits/payment method added.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="agentJson">Agent Configuration (JSON) *</label>
+                    <textarea id="agentJson" placeholder='{"name": "My Agent", "description": "...", "systemPrompt": "...", ...}'></textarea>
+                    <div class="help-text">
+                        Paste the JSON exported from the Agent Builder
+                    </div>
+                </div>
+
+                <button onclick="testConnection()">Test API Connection</button>
+                <button onclick="loadAgent()" style="margin-top: 10px;">Load Agent</button>
+
+                <div id="debugInfo" class="debug-info" style="display: none; margin-top: 20px;">
+                    <div class="debug-label">Debug Information:</div>
+                    <div id="debugContent"></div>
+                </div>
+            </div>
+
+            <!-- Right: Testing -->
+            <div class="card">
+                <h2>Test Agent</h2>
+
+                <div id="responseMessage" class="message"></div>
+
+                <div id="agentNotLoaded" style="text-align: center; padding: 40px; color: #999;">
+                    <p style="font-size: 2em; margin-bottom: 10px;">👈</p>
+                    <p>Load an agent on the left first</p>
+                </div>
+
+                <div id="agentLoaded" style="display: none;">
+                    <div class="agent-info">
+                        <div class="agent-name" id="displayAgentName">-</div>
+                        <div class="agent-desc" id="displayAgentDesc">-</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userInput">Your Input</label>
+                        <textarea id="userInput" placeholder="Ask your agent a question..."></textarea>
+                    </div>
+
+                    <button onclick="runAgent()">Run Agent</button>
+
+                    <div class="loading" id="loadingSpinner">
+                        <div class="spinner"></div>
+                        <p>Processing... (this may take a few seconds)</p>
+                    </div>
+
+                    <div id="responseBox" class="response-box">
+                        <div class="response-label">Agent Response</div>
+                        <div class="response-text" id="responseText"></div>
+                    </div>
+
+                    <div class="stats" id="statsBox" style="display: none;">
+                        <div class="stat">
+                            <div class="stat-value" id="statTokens">-</div>
+                            <div class="stat-label">Tokens Used</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="statTime">-</div>
+                            <div class="stat-label">Time (ms)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAgent = null;
+        let claudeApiKey = null;
+
+        function showMessage(elementId, type, message) {
+            const el = document.getElementById(elementId);
+            el.className = 'message ' + type;
+            el.textContent = message;
+        }
+
+        function showDebug(info) {
+            const debugEl = document.getElementById('debugInfo');
+            const contentEl = document.getElementById('debugContent');
+
+            if (typeof info === 'string') {
+                contentEl.textContent = info;
+            } else {
+                contentEl.textContent = JSON.stringify(info, null, 2);
+            }
+            debugEl.style.display = 'block';
+        }
+
+        async function testConnection() {
+            const apiKey = document.getElementById('claudeApiKey').value.trim();
+
+            if (!apiKey) {
+                showMessage('setupMessage', 'error', '❌ Please enter your API key');
+                return;
+            }
+
+            showMessage('setupMessage', 'info', '🔄 Testing API connection...');
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-3-5-sonnet-20241022',
+                        max_tokens: 50,
+                        messages: [{
+                            role: 'user',
+                            content: 'Say hello in one word'
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    const errorMsg = data.error?.message || JSON.stringify(data);
+                    showMessage('setupMessage', 'error', `❌ API Error: ${errorMsg}`);
+                    showDebug(`Status: ${response.status}\nError: ${errorMsg}`);
+                    return;
+                }
+
+                showMessage('setupMessage', 'success', '✓ API connection successful! Your key works.');
+                claudeApiKey = apiKey;
+            } catch (e) {
+                showMessage('setupMessage', 'error', `❌ Connection error: ${e.message}`);
+                showDebug(e.message);
+            }
+        }
+
+        function loadAgent() {
+            const jsonInput = document.getElementById('agentJson').value.trim();
+            const apiKey = document.getElementById('claudeApiKey').value.trim();
+
+            if (!jsonInput || !apiKey) {
+                showMessage('setupMessage', 'error', '❌ Please provide both API key and agent JSON');
+                return;
+            }
+
+            try {
+                const agentConfig = JSON.parse(jsonInput);
+
+                // Validate required fields
+                if (!agentConfig.name || !agentConfig.description || !agentConfig.systemPrompt) {
+                    showMessage('setupMessage', 'error', '❌ Agent JSON missing required fields: name, description, systemPrompt');
+                    return;
+                }
+
+                claudeApiKey = apiKey;
+                currentAgent = agentConfig;
+
+                document.getElementById('agentNotLoaded').style.display = 'none';
+                document.getElementById('agentLoaded').style.display = 'block';
+                document.getElementById('displayAgentName').textContent = agentConfig.name;
+                document.getElementById('displayAgentDesc').textContent = agentConfig.description;
+
+                showMessage('setupMessage', 'success', `✓ Agent "${agentConfig.name}" loaded successfully!`);
+            } catch (e) {
+                showMessage('setupMessage', 'error', `❌ Invalid JSON: ${e.message}`);
+                showDebug(`JSON Parse Error: ${e.message}\n\nYour input:\n${jsonInput}`);
+            }
+        }
+
+        async function runAgent() {
+            if (!currentAgent || !claudeApiKey) {
+                showMessage('responseMessage', 'error', '❌ No agent loaded');
+                return;
+            }
+
+            const userInput = document.getElementById('userInput').value.trim();
+            if (!userInput) {
+                showMessage('responseMessage', 'error', '❌ Please enter input');
+                return;
+            }
+
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('responseBox').classList.remove('show');
+            document.getElementById('responseMessage').style.display = 'none';
+            document.getElementById('statsBox').style.display = 'none';
+
+            const startTime = Date.now();
+
+            try {
+                const requestBody = {
+                    model: 'claude-3-5-sonnet-20241022',
+                    max_tokens: 1024,
+                    system: currentAgent.systemPrompt,
+                    messages: [{
+                        role: 'user',
+                        content: userInput
+                    }]
+                };
+
+                showDebug(`Sending request to Claude API...\nAgent: ${currentAgent.name}\nModel: claude-3-5-sonnet-20241022`);
+
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': claudeApiKey,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+                const endTime = Date.now();
+
+                document.getElementById('loadingSpinner').style.display = 'none';
+
+                if (!response.ok) {
+                    const errorMsg = data.error?.message || JSON.stringify(data);
+                    showMessage('responseMessage', 'error', `❌ API Error: ${errorMsg}`);
+                    showDebug(`HTTP Status: ${response.status}\nError: ${errorMsg}\n\nIf you see "invalid_api_key", your API key is wrong or expired.\nIf you see "overloaded_error", try again in a moment.`);
+                    return;
+                }
+
+                const assistantMessage = data.content[0].text;
+                const inputTokens = data.usage.input_tokens;
+                const outputTokens = data.usage.output_tokens;
+                const totalTokens = inputTokens + outputTokens;
+                const timeMs = endTime - startTime;
+
+                document.getElementById('responseText').textContent = assistantMessage;
+                document.getElementById('responseBox').classList.add('show');
+                document.getElementById('statTokens').textContent = totalTokens;
+                document.getElementById('statTime').textContent = timeMs;
+                document.getElementById('statsBox').style.display = 'grid';
+
+                showMessage('responseMessage', 'success', '✓ Response generated successfully');
+                showDebug(`Success! Generated response in ${timeMs}ms using ${totalTokens} tokens`);
+
+            } catch (e) {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                showMessage('responseMessage', 'error', `❌ Error: ${e.message}`);
+                showDebug(`Network/JavaScript Error: ${e.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
